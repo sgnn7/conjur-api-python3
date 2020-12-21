@@ -35,11 +35,11 @@ class InitControllerTest(unittest.TestCase):
         self.conjurrc_data.account=None
         with self.assertRaises(RuntimeError):
             self.conjurrc_data.appliance_url = 'https://someurl'
-            InitController.get_host_info(self.conjurrc_data)
+            InitController.get_account_info(self, self.conjurrc_data, "cert")
 
     @patch('builtins.input', return_value='someaccount')
     def test_init_host_is_added_to_conjurrc_object(self, mock_input):
-        InitController.get_host_info(self.conjurrc_data)
+        InitController.get_account_info(self, self.conjurrc_data, "cert")
         self.assertEquals(self.conjurrc_data.account, 'someaccount')
 
     '''

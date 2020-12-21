@@ -38,17 +38,19 @@ class InitController:
         Method that facilitates all method calls in this class
         """
         fetched_certificate = self.get_server_certificate()
-        self.get_host_info(self.conjurrc_data)
+
+        self.get_account_info(self.conjurrc_data, fetched_certificate)
+
         self.write_certificate(self.init_command_logic,
                                self.conjurrc_data,
                                self.conjurrc_data.cert_file,
                                fetched_certificate)
         self.init_command_logic.write_conjurrc(conjur.constants.DEFAULT_CONFIG_FILE,
-                                       self.conjurrc_data,
-                                       self.force_overwrite)
+                                               self.conjurrc_data,
+                                               self.force_overwrite)
         sys.stdout.write("Configuration initialized successfully!\n")
         sys.stdout.write("To begin using the CLI, log in to the Conjur server by" \
-                        "running `conjur authn login`")
+                         "running `conjur authn login`")
 
     def get_server_certificate(self):
         """
@@ -72,9 +74,9 @@ class InitController:
             fingerprint, fetched_certificate = self.init_command_logic.get_certificate(url.hostname, url.port)
             sys.stdout.write(f"\nThe server's certificate SHA-1 fingerprint is:\n{fingerprint}\n")
 
-            sys.stdout.write("\nTo verify this certificate, it is recommended to run the following" \
-                            "command on the Conjur server:\n" \
-                            "openssl x509 -fingerprint -noout -in ~conjur/etc/ssl/conjur.pem\n\n")
+            sys.stdout.write("\nTo verify this certificate, it is recommended to run the following " \
+                             "command on the Conjur server:\n" \
+                             "openssl x509 -fingerprint -noout -in ~conjur/etc/ssl/conjur.pem\n\n")
             trust_certificate = input("Trust this certificate? [no]: ")
             if trust_certificate.lower() != 'yes':
                 raise ValueError("You decided not to trust the certificate")
@@ -82,13 +84,13 @@ class InitController:
             return fetched_certificate
         return None
 
-    @staticmethod
-    def get_host_info(conjurrc_data):
+    def get_account_info(self, conjurrc_data, fetched_certificate):
         """
-        Method to hold data from the user
+        Method to fetch the account  from the user
         """
         if not conjurrc_data.account:
-            conjurrc_data.account = input("Enter your organization account name: ")
+            self.init_command_logic.fetch_account_from_server(self.conjurrc_data,
+                                                              fetched_certificate)
         else:
             conjurrc_data.account = ''.join(conjurrc_data.account)
 
@@ -107,5 +109,5 @@ class InitController:
                                             f"conjur-{conjurrc_data.account}.pem")
             conjurrc_data.cert_file = certificate_path
             init_command_logic.write_certificate_to_file(fetched_certificate,
-                                                 certificate_path,
-                                                 self.force_overwrite)
+                                                         certificate_path,
+                                                         self.force_overwrite)
